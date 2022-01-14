@@ -17,26 +17,33 @@ func must(d interface{}, err error) interface{} {
 
 func TestPipe(t *testing.T) {
   addr := "pipe:qkjjjdd"
+  t.Log(addr)
 
   l := must(Listen(addr)).(net.Listener)
   go func() {
-    c := must(l.Accept()).(net.Conn)
-    b := make([]byte, 0, 100)
+    for {
+      c := must(l.Accept()).(net.Conn)
 
-    go func() {
-      _, _ = c.Read(b)
-      print(b)
-      _, _ = c.Write(b)
-    }()
+      go func() {
+        b := make([]byte, 100)
+
+        for {
+          n := must(c.Read(b)).(int)
+          b = b[:n]
+          _, _ = c.Write(b)
+        }
+      }()
+    }
 
   }()
 
   client := must(Dial(context.Background(), addr)).(net.Conn)
   s := "this is test"
-  _, _ = client.Write([]byte(s))
-  r := make([]byte, 0, 100)
-  _, _ = client.Read(r)
+  _ = must(client.Write([]byte(s))).(int)
+
+  r := make([]byte, 100)
+  n := must(client.Read(r)).(int)
 
   a := assert.New(t)
-  a.EqualValues(s, r)
+  a.EqualValues([]byte(s), r[:n])
 }
