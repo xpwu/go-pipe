@@ -1,14 +1,13 @@
 package pipe
 
 import (
-  "io"
   "net"
   "time"
 )
 
 type conn struct {
-  reader *io.PipeReader
-  writer *io.PipeWriter
+  reader *Reader
+  writer *Writer
   addr *addr
 }
 
@@ -16,8 +15,8 @@ func connPair(addr *addr) (pair [2]*conn) {
   pair[0] = &conn{addr:addr}
   pair[1] = &conn{addr:addr}
 
-  pair[0].reader, pair[1].writer = io.Pipe()
-  pair[1].reader, pair[0].writer = io.Pipe()
+  pair[0].reader, pair[1].writer = Pipe()
+  pair[1].reader, pair[0].writer = Pipe()
 
   return
 }
@@ -53,16 +52,17 @@ func (c *conn) RemoteAddr() net.Addr {
 }
 
 func (c *conn) SetDeadline(t time.Time) error {
-  //panic("implement me")
+  c.reader.SetDeadline(t)
+  c.writer.SetDeadline(t)
   return nil
 }
 
 func (c *conn) SetReadDeadline(t time.Time) error {
-  //panic("implement me")
+  c.reader.SetDeadline(t)
   return nil
 }
 
 func (c *conn) SetWriteDeadline(t time.Time) error {
-  //panic("implement me")
+  c.writer.SetDeadline(t)
   return nil
 }
