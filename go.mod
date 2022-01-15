@@ -1,4 +1,4 @@
-module github.com/xpwu/go-var
+module github.com/xpwu/go-pipe
 
 go 1.16
 
